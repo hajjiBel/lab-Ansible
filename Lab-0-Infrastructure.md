@@ -43,12 +43,12 @@ Vagrant est un outil d'approvisionnement de serveur qui permet de créer et de g
 
 ### Tableau de Configuration des Machines
 
-| Nom d'hôte | Adresse IP   | Système d'Exploitation     | Rôle                    |
-|-----------|---------------|----------------------    --|------------------------|
-| master    | 192.168.60.1  | ubuntu 22.04               | Nœud de contrôle       |
-| app1      | 192.168.60.4  | ubuntu 22.04               | Serveur d'application  |
-| app2      | 192.168.60.5  | ubuntu 22.04               | Serveur d'application  |
-| db        | 192.168.60.6  | ubuntu 22.04               | Serveur de base données|
+| Nom d'hôte | Adresse IP     | Système d'Exploitation | Rôle                         |
+|------------|---------------|------------------------|------------------------------|
+| master     | 192.168.60.1  | Ubuntu 22.04           | Nœud de contrôle             |
+| app1       | 192.168.60.4  | Ubuntu 22.04           | Serveur d'application        |
+| app2       | 192.168.60.5  | Ubuntu 22.04           | Serveur d'application        |
+| db         | 192.168.60.6  | Ubuntu 22.04           | Serveur de base de données   |
 
 ## 📦 Prérequis et Installation
 
