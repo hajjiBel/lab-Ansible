@@ -323,8 +323,6 @@ ansible-playbook backup.yml  # Doit être tout OK (vert)
 
 ## 🚀 Application 2 : Déploiement Flask 
 
-
-
 Convertir Application 2 Lab 3 (ad-hoc) → Playbook structuré idempotent.
 
 Veuillez transposer les commandes ad-hoc utilisées dans la deuxième application 
@@ -340,129 +338,6 @@ ainsi que la vérification de l'état du service.
 Intégrez ces opérations dans un playbook structuré. 
 
 
-### 📄 Playbook Complet `/home/vagrant/flask-deploy.yml`
-
-```yaml
----
-- name: 🐍 Déploiement Application Flask Professionnelle
-  hosts: webservers
-  become: yes
-  tasks:
-    # ===== ÉTAPE A : DÉPENDANCES SYSTÈME =====
-    - name: 📦 Installer Python3 + dépendances
-      apt:
-        name:
-          - python3
-          - python3-pip
-          - python3-venv
-          - git
-          - curl
-        state: latest
-        update_cache: yes
-
-    # ===== ÉTAPE B : CLONAGE GIT =====
-    - name: 📁 Préparer /opt/flask-app
-      file:
-        path: /opt/flask-app
-        state: directory
-        owner: vagrant
-        group: vagrant
-        mode: '0755'
-
-    - name: 🌐 Cloner dépôt GitHub Flask
-      git:
-        repo: https://github.com/render-examples/flask-hello-world.git
-        dest: /opt/flask-app
-        version: main
-        accept_hostkey: yes
-        force: yes
-
-    # ===== ÉTAPE C : CONFIGURATION =====
-    - name: ⚙️ Créer config.ini production
-      ini_file:
-        path: /opt/flask-app/config.ini
-        section: production
-        option: debug
-        value: false
-        create: yes
-        owner: vagrant
-        group: vagrant
-        mode: '0644'
-
-    - name: 📚 Installer requirements.txt
-      pip:
-        requirements: /opt/flask-app/requirements.txt
-        executable: pip3
-        owner: vagrant
-        group: vagrant
-
-    - name: 🦄 Installer Gunicorn WSGI
-      pip:
-        name: gunicorn
-        executable: pip3
-        state: latest
-        owner: vagrant
-        group: vagrant
-
-    # ===== ÉTAPE D : SYSTEMD SERVICE =====
-    - name: ⚙️ Créer service systemd flask-app
-      copy:
-        content: |
-          [Unit]
-          Description=Flask Hello World Application
-          After=network.target
-          
-          [Service]
-          Type=simple
-          User=vagrant
-          Group=vagrant
-          WorkingDirectory=/opt/flask-app
-          Environment=PATH=/usr/local/bin:/usr/bin:/bin
-          ExecStart=/usr/bin/python3 -m gunicorn -w 4 -b 0.0.0.0:5000 app:app
-          Restart=always
-          RestartSec=10
-          
-          [Install]
-          WantedBy=multi-user.target
-        dest: /etc/systemd/system/flask-app.service
-        owner: root
-        group: root
-        mode: '0644'
-        backup: yes
-
-    - name: 🔄 Recharger configuration systemd
-      systemd:
-        daemon_reload: yes
-
-    # ===== ÉTAPE E : DÉMARRAGE =====
-    - name: ▶️ Activer et démarrer Flask
-      systemd:
-        name: flask-app
-        state: started
-        enabled: yes
-
-    # ===== ÉTAPE F : VALIDATION =====
-    - name: 🌡️ Vérifier port 5000
-      wait_for:
-        port: 5000
-        host: "{{ ansible_default_ipv4.address }}"
-        delay: 5
-        timeout: 30
-
-    - name: 🧪 Test fonctionnel application
-      uri:
-        url: "http://{{ ansible_default_ipv4.address }}:5000"
-        method: GET
-        status_code: 200
-      register: flask_test
-
-    - name: 📊 Rapport déploiement
-      debug:
-        msg: |
-          ✅ Flask déployé sur {{ inventory_hostname }}
-          📍 URL: http://{{ ansible_default_ipv4.address }}:5000
-          ✅ Status: {{ flask_test.status }}
-          🐍 Python: {{ ansible_python_version }}
 
 
 ## 🎓 Compétences Acquises
