@@ -461,50 +461,91 @@ app2 : ok=2 changed=0 unreachable=0 failed=0 skipped=0 rescued=0 ignored=0
 
 ## Application 1
 
-### Question de réflexion
+• Créez un dossier webapp qui va contenir tous les fichiers de notre projet
+• Créez un fichier d’inventaire appelé prod.yml (au format yaml) contenant un groupe prod avec comme seul
+membre notre client
+• Créez un dossier group_vars qui va contenir un fichier nommé prod qui contiendra les informations de connexion à
+utiliser par ansible (login et mot de passe)
+• Créez un playbook nommé deploy.yml permettant de déployez apache à l’aide de docker sur le client (l’image à
+utiliser est httpd et le port à exposer à l’extérieur est le 80)
+• Vous avez le droit d’installer tout prérequis que vous jugerez nécessaire à l’aide du module yum
+• Vérifiez la syntaxe de votre playbook avec la commande ansible-lint (installez là si elle n’est pas disponible)
+• Vérifiez qu’après l’exécution de votre playbook le site par défaut de apache est bien disponible sur le port 80
 
-Comment pourriez-vous augmenter la **modularité** et l'**adaptabilité** du dernier playbook du Lab 4 (Application 1) en introduisant des variables pour :
+Solution déploiement Docker + Apache
+1. Arborescence du projet
 
-- Les chemins
-- Les URL
-- Les autres valeurs spécifiques
+Dans votre répertoire de travail sur le nœud de contrôle Ansible :
 
-Cela faciliterait ainsi la personnalisation du playbook en fonction de différentes configurations système.
+mkdir -p webapp/group_vars
+cd webapp
 
-### Pistes de réponse
+L’arborescence attendue :
 
-**Exemple de refactorisation avec variables :**
+webapp/
+  ├─ prod.yml          # inventaire au format YAML
+  ├─ group_vars/
+  │    └─ prod         # variables du groupe prod
+  └─ deploy.yml        # playbook de déploiement Docker+Apache
+2. Variables de groupe : group_vars/prod
 
-```yaml
----
-- name: Deploy application
-  hosts: webservers
-  become: yes
-  vars:
-    app_name: myapp
-    app_path: /var/www/{{ app_name }}
-    app_url: https://github.com/user/{{ app_name }}.git
-    app_port: 8080
-    service_name: "{{ app_name }}-service"
-  tasks:
-    - name: Clone application repository
-      git:
-        repo: "{{ app_url }}"
-        dest: "{{ app_path }}"
-        version: main
+Dans group_vars/prod (sans extension), placez les informations de connexion à utiliser par Ansible (login + mot de passe, plus éventuellement sudo) :
 
-    - name: Configure application
-      template:
-        src: config.j2
-        dest: "{{ app_path }}/config.yml"
-
-    - name: Start service
-      service:
-        name: "{{ service_name }}"
-        state: started
-        enabled: yes
+# group_vars/prod
 ```
+ansible_user: devops                # utilisateur SSH sur le client
+ansible_password: "MotDePasseSSH"   # mot de passe SSH
+ansible_connection: ssh
 
+ansible_become: true
+ansible_become_method: sudo
+ansible_become_password: "MotDePasseSudo"
+```
+3. Playbook deploy.yml
+ ```
+---
+- name: Déployer Apache via Docker sur le client
+  hosts: app1
+  become: true
+
+  vars:
+    httpd_image: "httpd:latest"
+    httpd_container_name: "webapp_httpd"
+    httpd_host_port: 8080
+    httpd_container_port: 80
+
+  tasks:
+    - name: Installer Docker et dépendances Python pour Docker
+      apt:
+        name:
+          - docker.io
+          - python3-pip
+          - python3-docker
+        state: present
+
+    - name: Corriger la pile Python Docker (bug http+docker)
+      ansible.builtin.pip:
+        name:
+          - "requests<2.32.0"
+          - "docker>=6.1.0"
+        executable: pip3
+      when: ansible_os_family == "Debian"
+
+    - name: S'assurer que le service Docker est démarré et activé
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Déployer le conteneur Apache httpd
+      community.docker.docker_container:
+        name: "{{ httpd_container_name }}"
+        image: "{{ httpd_image }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "{{ httpd_host_port }}:{{ httpd_container_port }}"
+```
 **Avantages de cette approche :**
 
 1. **Réutilisabilité** : Le même playbook peut être utilisé pour différentes applications
