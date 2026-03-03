@@ -338,6 +338,76 @@ ainsi que la vérification de l'état du service.
 Intégrez ces opérations dans un playbook structuré. 
 
 
+```
+---
+- name:  playbook Flask webservers
+  hosts: webservers
+  become: yes
+  tasks:
+    # 1. Install python3
+    - name: Tâche 1 - Installation python3-pip
+      apt:
+        name: python3-pip
+        state: latest
+        update_cache: yes
+
+    # 2. créer répertoire flask
+    - name:  Créer répertoire /opt/flask-app
+      file:
+        path: /opt/flask-app
+        state: directory
+        owner: vagrant
+        group: vagrant
+        mode: '0755'
+
+    # 3. Clone Git
+    - name:  Clone Git
+      git:
+        repo: "https://github.com/render-examples/flask-hello-world.git"
+        dest: "/opt/flask-app"
+        version: "main"
+
+    # 4. creer fichier de conf ini
+    - name:  creer fichier de conf ini
+      ini_file:
+        path: /opt/flask-app/config.ini
+        section: production
+        option: debug
+        value: false
+        owner: vagrant
+        group: vagrant
+        mode: '0640'
+
+    # 5. installer requirement.txt
+    - name:  installer requirement.txt
+      shell:
+        sudo /usr/bin/python3 -m pip install -r /opt/flask-app/requirements.txt
+
+    # 6. créer le service
+    - name:  créer le service
+      copy:
+        src: flask-app.service
+        dest: /etc/systemd/system/flask-app.service
+
+    # 7. démarrer le service
+    - name:  démarrer le service
+      systemd:
+        name: flask-app
+        state: started
+        enabled: yes
+
+    # 8. Vérifier port 8000 accessible
+    - name:  Vérifier port 8000 accessible
+      uri:
+        url: http://localhost:8000
+        method: GET
+        status_code: 200
+      register: nginx_check
+
+    - name:  Confirmer succès déploiement
+      debug:
+        msg: "Flask opérationnel sur {{ inventory_hostname }} - Status: {{ nginx_check.status }}"
+```
 
 
 ## 🎓 Compétences Acquises
