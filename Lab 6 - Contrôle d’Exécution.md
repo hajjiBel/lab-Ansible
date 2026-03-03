@@ -419,7 +419,7 @@ Crée des utilisateurs dont l'UID commence par 3 dans le groupe d'hôtes dbserve
 Les utilisateurs doivent faire partie du groupe supplémentaire wheel.
 Le shell des utilisateurs doit être réglé sur /bin/bash.
 
-
+```
 
 ---
 - name: Gestion des utilisateurs par UID et groupes d'hôtes
@@ -458,4 +458,4 @@ Le shell des utilisateurs doit être réglé sur /bin/bash.
       when: 
         - "'dbservers' in group_names"
         - "item.uid >= 3000 and item.uid < 4000"
-
+```
