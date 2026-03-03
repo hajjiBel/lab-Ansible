@@ -1,6 +1,50 @@
 
-**Lab 6 – Ansible Roles
+**Lab 8 – Ansible Roles
 ======================
+## 🎯 Objectifs
+
+À la fin de ce lab, vous serez capable de :
+- Comprendre la structure des rôles Ansible
+- Créer des rôles réutilisables
+- Utiliser les dépendances entre rôles
+- Implémenter des rôles complexes
+- Partager les rôles avec la communauté
+
+## 📋 Introduction
+
+Un rôle Ansible est une unité réutilisable de code qui encapsule les tâches, variables, templates et fichiers liés à une fonctionnalité spécifique. Les rôles permettent d'organiser le code et de le partager facilement.
+
+### Structure d'un Rôle
+
+```
+roles/
+├── common/
+│   ├── defaults/
+│   │   └── main.yml              # Variables par défaut
+│   ├── vars/
+│   │   └── main.yml              # Variables du rôle
+│   ├── files/
+│   │   └── config.ini            # Fichiers statiques
+│   ├── templates/
+│   │   └── sysctl.conf.j2        # Templates Jinja2
+│   ├── tasks/
+│   │   └── main.yml              # Tâches principales
+│   ├── handlers/
+│   │   └── main.yml              # Handlers du rôle
+│   ├── meta/
+│   │   └── main.yml              # Métadonnées et dépendances
+│   └── README.md                 # Documentation
+├── webserver/
+│   ├── defaults/
+│   ├── tasks/
+│   ├── templates/
+│   └── ...
+└── database/
+    ├── defaults/
+    ├── tasks/
+    ├── templates/
+    └── ...
+```
 # Créer un rôle Ansible
 
 Pour créer un rôle dans Ansible , utilisez simplement la syntaxe.
