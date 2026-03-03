@@ -198,22 +198,21 @@ Créez un nouveau dossier nommé templates et préparez-y un modèle
 qui sera utilisé plus tard pour générer un fichier hosts pour chaque 
 nœud à partir de l'inventaire. 
 L'idée générale est décrite ci-dessous :
-
 Nommez le fichier hosts.j2 :
+```
 127.0.0.1 localhost <nom_court_local> <fqdn_local>
 127.0.1.1 localhost
 <ip_address_host1> <nom_court_host1> <fqdn_host1>
 <ip_address_host2> <nom_court_host2> <fqdn_host2>
-[...]
+```
 
 
 Créez un playbook nommé hosts.yml qui respecte les exigences suivantes :
 
 *Il s'exécute sur tous les hôtes.
 
-*Il utilise un modèle pour remplir le fichier hosts.j2 créé précédemment 
-*pour tous les hôtes de l'inventaire.
+*Il utilise un modèle pour remplir le fichier hosts.j2 créé précédemment pour tous les hôtes de l'inventaire.
 
 *Après l'exécution du playbook, il devrait être possible d'atteindre 
-*un autre nœud depuis n'importe quel nœud en utilisant l'IP, 
-*le nom court ou le FQDN.
+
+*un autre nœud depuis n'importe quel nœud en utilisant l'IP, le nom court ou le FQDN.
