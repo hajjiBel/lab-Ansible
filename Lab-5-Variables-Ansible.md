@@ -459,50 +459,175 @@ app2 : ok=2 changed=0 unreachable=0 failed=0 skipped=0 rescued=0 ignored=0
 
 ---
 
+Déploiement Docker + Apache
+
 ## Application 1
 
-• Créez un dossier webapp qui va contenir tous les fichiers de notre projet
-• Créez un fichier d’inventaire appelé prod.yml (au format yaml) contenant un groupe prod avec comme seul
-membre notre client
-• Créez un dossier group_vars qui va contenir un fichier nommé prod qui contiendra les informations de connexion à
-utiliser par ansible (login et mot de passe)
-• Créez un playbook nommé deploy.yml permettant de déployez apache à l’aide de docker sur le client (l’image à
-utiliser est httpd et le port à exposer à l’extérieur est le 80)
-• Vous avez le droit d’installer tout prérequis que vous jugerez nécessaire à l’aide du module yum
-• Vérifiez la syntaxe de votre playbook avec la commande ansible-lint (installez là si elle n’est pas disponible)
-• Vérifiez qu’après l’exécution de votre playbook le site par défaut de apache est bien disponible sur le port 80
+### Objectifs
 
-Solution déploiement Docker + Apache
-1. Arborescence du projet
+- Créer un dossier `webapp` qui va contenir tous les fichiers du projet
+- Créer un fichier d'inventaire appelé `prod.yml` (au format YAML) contenant un groupe `prod` avec comme seul membre notre client
+- Créer un dossier `group_vars` qui va contenir un fichier nommé `prod` contenant les informations de connexion à utiliser par Ansible (login et mot de passe)
+- Créer un playbook nommé `deploy.yml` permettant de déployer Apache à l'aide de Docker sur le client (l'image à utiliser est `httpd` et le port à exposer à l'extérieur est le 80)
+- Installer tout prérequis nécessaire à l'aide du module approprié
+- Vérifier la syntaxe du playbook avec la commande `ansible-lint` (installer si nécessaire)
+- Vérifier qu'après l'exécution du playbook, le site par défaut d'Apache est bien disponible sur le port 80
 
-Dans votre répertoire de travail sur le nœud de contrôle Ansible :
+---
 
+## Solution : Déploiement Docker + Apache
+
+### 1. Arborescence du projet
+
+Dans votre répertoire de travail sur le nœud de contrôle Ansible :
+
+```bash
 mkdir -p webapp/group_vars
 cd webapp
+```
 
-L’arborescence attendue :
+**Arborescence attendue :**
 
+```
 webapp/
   ├─ prod.yml          # inventaire au format YAML
   ├─ group_vars/
   │    └─ prod         # variables du groupe prod
   └─ deploy.yml        # playbook de déploiement Docker+Apache
-2. Variables de groupe : group_vars/prod
-
-Dans group_vars/prod (sans extension), placez les informations de connexion à utiliser par Ansible (login + mot de passe, plus éventuellement sudo) :
-
-# group_vars/prod
 ```
-ansible_user: devops                # utilisateur SSH sur le client
-ansible_password: "MotDePasseSSH"   # mot de passe SSH
+
+---
+
+### 2. Fichier d'inventaire : prod.yml
+
+Créez le fichier `prod.yml` à la racine du dossier `webapp` :
+
+```yaml
+---
+all:
+  children:
+    prod:
+      hosts:
+        app1:
+          ansible_host: 192.168.1.100  # Adresse IP de votre client
+```
+
+**Remarque :** Remplacez `192.168.1.100` par l'adresse IP réelle de votre machine cliente.
+
+---
+
+### 3. Variables de groupe : group_vars/prod
+
+Dans `group_vars/prod` (sans extension), placez les informations de connexion à utiliser par Ansible (login + mot de passe, plus éventuellement sudo) :
+
+```yaml
+# group_vars/prod
+ansible_user: devops                    # utilisateur SSH sur le client
+ansible_password: "MotDePasseSSH"       # mot de passe SSH
 ansible_connection: ssh
 
 ansible_become: true
 ansible_become_method: sudo
 ansible_become_password: "MotDePasseSudo"
 ```
-3. Playbook deploy.yml
- ```
+
+**Remarques :**
+- Remplacez `devops` par votre nom d'utilisateur réel
+- Remplacez `MotDePasseSSH` et `MotDePasseSudo` par vos mots de passe réels
+- Pour plus de sécurité en production, utilisez `ansible-vault` pour chiffrer ce fichier
+
+---
+
+### 4. Playbook : deploy.yml
+
+Créez le fichier `deploy.yml` à la racine du dossier `webapp` :
+
+```yaml
+---
+- name: Déployer Apache via Docker sur le client
+  hosts: prod
+  become: true
+
+  vars:
+    httpd_image: "httpd:latest"
+    httpd_container_name: "webapp_httpd"
+    httpd_host_port: 80
+    httpd_container_port: 80
+
+  tasks:
+    - name: Installer Docker et dépendances Python pour Docker
+      apt:
+        name:
+          - docker.io
+          - python3-pip
+          - python3-docker
+        state: present
+        update_cache: yes
+
+    - name: Corriger la pile Python Docker (bug http+docker)
+      ansible.builtin.pip:
+        name:
+          - "requests<2.32.0"
+          - "docker>=6.1.0"
+        executable: pip3
+      when: ansible_os_family == "Debian"
+
+    - name: S'assurer que le service Docker est démarré et activé
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Déployer le conteneur Apache httpd
+      community.docker.docker_container:
+        name: "{{ httpd_container_name }}"
+        image: "{{ httpd_image }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "{{ httpd_host_port }}:{{ httpd_container_port }}"
+```
+
+---
+
+### 5. Installation d'ansible-lint
+
+Sur le nœud de contrôle Ansible :
+
+```bash
+pip3 install ansible-lint
+```
+
+---
+
+### 6. Vérification de la syntaxe
+
+Vérifiez la syntaxe du playbook avec `ansible-lint` :
+
+```bash
+ansible-lint deploy.yml
+```
+
+Si des avertissements ou erreurs apparaissent, corrigez-les avant de continuer.
+
+---
+
+### 7. Installation de la collection Docker
+
+Le module `community.docker.docker_container` nécessite la collection Docker :
+
+```bash
+ansible-galaxy collection install community.docker
+```
+
+---
+
+### 8. Exécution du playbook
+
+Exécutez le playbook pour déployer Apache via Docker :
+
+
+```
 ---
 - name: Déployer Apache via Docker sur le client
   hosts: app1
@@ -546,6 +671,39 @@ ansible_become_password: "MotDePasseSudo"
         ports:
           - "{{ httpd_host_port }}:{{ httpd_container_port }}"
 ```
+
+
+
+```bash
+ansible-playbook -i prod.yml deploy.yml
+```
+
+---
+
+### 9. Vérification du déploiement
+
+#### Sur le client (nœud app1)
+
+Vérifiez que le conteneur Docker est en cours d'exécution :
+
+```bash
+sudo docker ps
+```
+
+Vous devriez voir un conteneur nommé `webapp_httpd` basé sur l'image `httpd:latest`.
+
+#### Depuis le nœud de contrôle ou n'importe quelle machine
+
+Testez l'accès au site Apache par défaut :
+
+```bash
+curl http://192.168.1.100:80
+```
+
+Ou ouvrez un navigateur et accédez à : `http://192.168.1.100`
+
+Vous devriez voir la page par défaut d'Apache : **"It works!"**
+ 
 **Avantages de cette approche :**
 
 1. **Réutilisabilité** : Le même playbook peut être utilisé pour différentes applications
