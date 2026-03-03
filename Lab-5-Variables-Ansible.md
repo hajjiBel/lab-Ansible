@@ -626,54 +626,6 @@ ansible-galaxy collection install community.docker
 
 Exécutez le playbook pour déployer Apache via Docker :
 
-
-```
----
-- name: Déployer Apache via Docker sur le client
-  hosts: app1
-  become: true
-
-  vars:
-    httpd_image: "httpd:latest"
-    httpd_container_name: "webapp_httpd"
-    httpd_host_port: 8080
-    httpd_container_port: 80
-
-  tasks:
-    - name: Installer Docker et dépendances Python pour Docker
-      apt:
-        name:
-          - docker.io
-          - python3-pip
-          - python3-docker
-        state: present
-
-    - name: Corriger la pile Python Docker (bug http+docker)
-      ansible.builtin.pip:
-        name:
-          - "requests<2.32.0"
-          - "docker>=6.1.0"
-        executable: pip3
-      when: ansible_os_family == "Debian"
-
-    - name: S'assurer que le service Docker est démarré et activé
-      service:
-        name: docker
-        state: started
-        enabled: true
-
-    - name: Déployer le conteneur Apache httpd
-      community.docker.docker_container:
-        name: "{{ httpd_container_name }}"
-        image: "{{ httpd_image }}"
-        state: started
-        restart_policy: always
-        ports:
-          - "{{ httpd_host_port }}:{{ httpd_container_port }}"
-```
-
-
-
 ```bash
 ansible-playbook -i prod.yml deploy.yml
 ```
