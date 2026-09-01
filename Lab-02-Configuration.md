@@ -304,14 +304,10 @@ ansible-config view
 # Lister toutes les options de configuration
 ansible-config list
 
-# Valider la syntaxe d'ansible.cfg
-ansible-config validate
 
 # Voir quel fichier ansible.cfg est utilisé
 ansible-config list | grep CONFIG_FILE
 
-# Voir le chemin de recherche des inventaires
-ansible all -i inventory/ --list-hosts
 ```
 
 ## 🐛 Dépannage
