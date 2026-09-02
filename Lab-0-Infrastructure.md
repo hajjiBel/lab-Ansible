@@ -32,7 +32,7 @@ Vagrant est un outil d'approvisionnement de serveur qui permet de créer et de g
 │  │                                                       │  │
 │  │  ┌─────────────────────────────────────────────────┐  │  │
 │  │  │              master (Contrôle)                  │  │  │
-│  │  │               192.168.60.1                      │  │  │
+│  │  │               192.168.60.3                      │  │  │
 │  │  │               ubuntu 22.04                      │  │  │
 │  │  └─────────────────────────────────────────────────┘  │  │
 │  │                                                       │  │
@@ -45,7 +45,7 @@ Vagrant est un outil d'approvisionnement de serveur qui permet de créer et de g
 
 | Nom d'hôte | Adresse IP     | Système d'Exploitation | Rôle                         |
 |------------|---------------|------------------------|------------------------------|
-| master     | 192.168.60.1  | Ubuntu 22.04           | Nœud de contrôle             |
+| master     | 192.168.60.3  | Ubuntu 22.04           | Nœud de contrôle             |
 | app1       | 192.168.60.4  | Ubuntu 22.04           | Serveur d'application        |
 | app2       | 192.168.60.5  | Ubuntu 22.04           | Serveur d'application        |
 | db         | 192.168.60.6  | Ubuntu 22.04           | Serveur de base de données   |
@@ -110,7 +110,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION)  do  |config|
   #  ControlMaster
   config.vm.define  "master"  do  |app|
     app.vm.hostname  =  "master.dev"
-    app.vm.network  :private_network,  ip:  "192.168.60.1"
+    app.vm.network  :private_network,  ip:  "192.168.60.3"
   end
 
 	#  Application  server 1.
@@ -215,7 +215,7 @@ done
 Sur votre machine hôte, ajouter les entrées dans `/etc/hosts` (Linux/Mac):
 
 ```
-192.168.60.1  master 
+192.168.60.3  master 
 192.168.60.4  app1 
 192.168.60.5  app2 
 192.168.60.6  db 
