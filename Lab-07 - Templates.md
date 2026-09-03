@@ -216,3 +216,17 @@ Créez un playbook nommé hosts.yml qui respecte les exigences suivantes :
 *Après l'exécution du playbook, il devrait être possible d'atteindre 
 
 *un autre nœud depuis n'importe quel nœud en utilisant l'IP, le nom court ou le FQDN.
+
+
+
+## Application (suite) : Rotation de logs avec templates Jinja2
+
+Remplacez la configuration logrotate codée en dur par un template
+`logrotate.conf.j2` :
+
+- Le template doit inclure un bloc postrotate qui journalise la date et le
+  hostname de la rotation dans un fichier rotation.history
+- La compression doit être conditionnée par une variable booléenne
+
+Forcez une rotation avec `logrotate --force` et vérifiez que le fichier
+rotation.history contient bien l'horodatage attendu.
