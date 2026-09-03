@@ -300,20 +300,7 @@ l'hôte a plus de, disons, ***400Mo*** de RAM.
 Exécutez le Playbook. En conséquence, la tâche d'installation doit être
 ignorée sur quelques noeuds qui ne satisfont pas la condition.
 
-#### Solution
-```
----
-- name: MariaDB server installation
-  hosts: all
-  gather_facts: yes
-  become: yes
-  tasks:
-  - name: Install latest MariaDB server when host RAM greater than 700 MB
-    yum:
-      name: mariadb-server
-      state: latest
-    when: ansible_memfree_mb > 700
-```
+
 
 # Ansible Handlers
 
@@ -459,3 +446,20 @@ Le shell des utilisateurs doit être réglé sur /bin/bash.
         - "'dbservers' in group_names"
         - "item.uid >= 3000 and item.uid < 4000"
 ```
+
+
+## Application (suite) : Rotation de logs multi-applications
+
+Améliorez le playbook `log-rotation.yml` pour gérer plusieurs applications
+à la fois, définies dans une liste de hashs (nom + jours de rétention) :
+
+- Utilisez une boucle pour créer les répertoires de logs et générer une
+  configuration logrotate par application
+- Affichez un message debug d'alerte lorsque la rétention configurée pour
+  une application est inférieure à 14 jours ET que l'environnement est en
+  production
+- Utilisez un handler pour tester chaque configuration générée avec
+  `logrotate --debug`, déclenché uniquement en cas de modification
+
+Vérifiez que les configurations sont bien créées pour toutes les
+applications, avec des rétentions différentes selon les cas.
