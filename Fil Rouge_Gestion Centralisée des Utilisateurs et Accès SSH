@@ -1,0 +1,74 @@
+Gestion Centralisée des Utilisateurs et Accès SSH
+ Lab 4
+
+## Application 5 : Gestion des utilisateurs et accès SSH
+
+Créez un playbook `users.yml` qui met en place des comptes utilisateurs sur
+le groupe d'hôtes webservers. Le playbook doit :
+
+- Créer un utilisateur `deploy` avec un shell `/bin/bash`
+- Ajouter la clé publique SSH de cet utilisateur (fichier local
+  `deploy_key.pub`) dans ses `authorized_keys`
+- Créer un répertoire `/opt/deploy` appartenant à cet utilisateur, avec les
+  permissions `0750`
+
+Vérifiez que vous pouvez vous connecter en SSH avec l'utilisateur `deploy`
+sur app1 et app2 en utilisant la clé privée correspondante.
+ Lab 5
+
+## Application 5 (suite) : Utilisateurs avec variables
+
+Reprenez le playbook `users.yml` et externalisez en variables :
+
+- Le nom de l'utilisateur à créer
+- Le chemin du répertoire de travail qui lui est dédié
+- Le shell à utiliser
+
+Surchargez le nom d'utilisateur pour app2 uniquement (host_vars), par
+exemple `deploy-app2` au lieu de `deploy`, et vérifiez que le compte créé
+diffère bien entre app1 et app2.
+À ajouter en fin de Lab 6
+markdown
+## Application 5 (suite) : Plusieurs utilisateurs, conditions et handler
+
+Améliorez le playbook `users.yml` pour gérer plusieurs utilisateurs à la
+fois, définis dans une liste de hashs (nom + rôle : "admin" ou "dev") :
+
+- Utilisez une boucle pour créer l'ensemble des utilisateurs et déployer
+  leurs clés SSH respectives
+- Ajoutez les utilisateurs dont le rôle est "admin" au groupe `sudo`,
+  uniquement dans ce cas (condition `when`)
+- Ajoutez une ligne dans `/etc/ssh/sshd_config` interdisant la connexion
+  root par mot de passe (`PermitRootLogin prohibit-password`) et utilisez
+  un handler pour redémarrer le service `sshd`, déclenché uniquement si la
+  ligne a réellement été modifiée
+
+Exécutez le playbook deux fois de suite et vérifiez l'idempotence.
+
+ Lab 7
+
+## Application 5 (suite) : Accès SSH avec templates Jinja2
+
+Remplacez la gestion manuelle de la configuration SSH par un template
+`sshd_custom.conf.j2` déployé dans `/etc/ssh/sshd_config.d/` :
+
+- Le template doit lister dynamiquement, en commentaire, les utilisateurs
+  autorisés à se connecter (`AllowUsers`), générés à partir de la liste de
+  hashs du Lab 6
+- Créez également un template `motd.j2` affichant, à la connexion, le
+  hostname, l'OS et la liste des utilisateurs "admin" du serveur
+
+Connectez-vous en SSH et vérifiez que le message d'accueil (MOTD) reflète
+bien les informations attendues pour l'hôte concerné.
+
+Lab 8
+
+## Application 5 (suite) : Gestion des utilisateurs en rôle Ansible
+
+Transformez l'ensemble du playbook `users.yml` (Labs 4 à 7) en un rôle
+Ansible nommé `user-management`, avec la liste des utilisateurs et leurs
+rôles définis dans `defaults/main.yml` (surchargeable via group_vars).
+
+Créez un playbook qui utilise ce rôle sur le groupe webservers, et vérifiez
+que le comportement est identique à celui obtenu au Lab 7 (utilisateurs
+créés, groupe sudo pour les admins, configuration SSH et MOTD générés).
