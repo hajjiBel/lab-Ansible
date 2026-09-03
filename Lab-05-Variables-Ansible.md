@@ -264,7 +264,7 @@ Vous avez maintenant toutes les informations pour effectuer les tâches suivante
 
 1. Dans le fichier de variables du groupe **webservers**, définissez une variable **service** par `sshd`.
 
-2. Dans le fichier de variable hôte de l'hôte **app1**, définissez une variable **service** par `httpd`.
+2. Dans le fichier de variable hôte de l'hôte **app1**, définissez une variable **service** par `apache2`.
 
 3. Créez un playbook `check_service.yml` pour redémarrer un service dont le nom est défini par la variable **service**. Rendez-le applicable à tous les hôtes.
 
