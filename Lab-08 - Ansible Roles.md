@@ -346,6 +346,19 @@ l'utilisateur en essayant d'écrire beaucoup de code redondant qui aurait
 
 
 ---
+
+## Application (suite) : Rotation de logs en rôle Ansible
+
+Transformez l'ensemble du playbook `log-rotation.yml` (Labs 4 à 7) en un
+rôle Ansible nommé `log-rotation`, avec la liste des applications et leurs
+paramètres définis dans defaults/main.yml (surchargeables via group_vars).
+
+Créez un playbook qui utilise ce rôle sur le groupe webservers, et vérifiez
+que le comportement est identique à celui obtenu au Lab 7.
+
+
+
+
 ## Application
 ***Décomposition en Rôles : 
 Transformez le playbook de l'application flask en une structure de rôles 
