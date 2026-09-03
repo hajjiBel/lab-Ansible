@@ -411,48 +411,62 @@ Intégrez ces opérations dans un playbook structuré.
 
 
 ## Application 3 : Rotation de logs applicatifs
-#1. Qu'est-ce que Logrotate ?
 
-Logrotate est un outil Linux permettant de gérer automatiquement les fichiers de logs.
+## 1. Qu'est-ce que Logrotate ?
 
-Son objectif principal est d'éviter que les fichiers de logs deviennent trop volumineux et finissent par saturer l'espace disque.
+**Logrotate** est un outil Linux permettant de **gérer automatiquement les fichiers de logs**.
+Son objectif principal est d'éviter que les fichiers de logs deviennent trop volumineux et finissent par **saturer l'espace disque**.
 
-#2. Pourquoi utiliser Logrotate ?
+---
+
+## 2. Pourquoi utiliser Logrotate ?
 
 Une application peut écrire continuellement dans un fichier :
 
+```text
 /var/log/myapp/app.log
+```
 
 Sans rotation, le fichier peut devenir très volumineux :
 
+```text
 app.log → 100 MB → 500 MB → 2 GB → ...
+```
 
 Logrotate permet de conserver plusieurs anciennes versions :
 
+```text
 app.log
 app.log.1
 app.log.2
 app.log.3
 ...
+```
 
 Les anciens fichiers peuvent également être compressés :
 
+```text
 app.log
 app.log.1.gz
 app.log.2.gz
 app.log.3.gz
-#3. Configuration de Logrotate
+```
+
+---
+
+## 3. Configuration de Logrotate
 
 Les configurations spécifiques aux applications se trouvent généralement dans :
 
+```text
 /etc/logrotate.d/
+```
 
-Exemple :
-
-
-/etc/logrotate.d/myapp
+Exemple : `/etc/logrotate.d/myapp`
 
 Configuration :
+
+```text
 /var/log/myapp/*.log {
     daily
     rotate 7
@@ -460,32 +474,31 @@ Configuration :
     missingok
     notifempty
 }
+```
 
-#4. Principales directives
-Directive	Signification
+---
 
-daily	Rotation chaque jour
+## 4. Principales directives
 
-weekly	Rotation chaque semaine
+| Directive | Signification |
+|---|---|
+| `daily` | Rotation chaque jour |
+| `weekly` | Rotation chaque semaine |
+| `monthly` | Rotation chaque mois |
+| `rotate 7` | Conserver 7 anciennes rotations |
+| `compress` | Compresser les anciens logs |
+| `missingok` | Ne pas générer d'erreur si le fichier n'existe pas |
+| `notifempty` | Ne pas faire de rotation si le fichier est vide |
+| `copytruncate` | Copier le log puis vider le fichier original |
+| `delaycompress` | Compresser l'ancien log lors de la rotation suivante |
 
-monthly	Rotation chaque mois
+---
 
-rotate 7	Conserver 7 anciennes rotations
-
-compress	Compresser les anciens logs
-
-missingok	Ne pas générer d'erreur si le fichier n'existe pas
-
-notifempty	Ne pas faire de rotation si le fichier est vide
-
-copytruncate	Copier le log puis vider le fichier original
-
-delaycompress	Compresser l'ancien log lors de la rotation suivante
-
-5. Exemple concret
+## 5. Exemple concret
 
 Configuration :
 
+```text
 /var/log/myapp/app.log {
     daily
     rotate 7
@@ -493,9 +506,11 @@ Configuration :
     missingok
     notifempty
 }
+```
 
 Après plusieurs rotations, on peut avoir :
 
+```text
 /var/log/myapp/
 ├── app.log
 ├── app.log.1.gz
@@ -505,11 +520,12 @@ Après plusieurs rotations, on peut avoir :
 ├── app.log.5.gz
 ├── app.log.6.gz
 └── app.log.7.gz
+```
 
-Le fichier app.log correspond au log actuel.
+Le fichier `app.log` correspond au log actuel.
+Les fichiers `.gz` correspondent aux anciens logs compressés.
 
-Les fichiers .gz correspondent aux anciens logs compressés.
-#Travail demandé
+# Travail demandé
 Créez un playbook `log-rotation.yml` qui met en place la rotation des logs
 d'une application fictive sur le groupe webservers. Le playbook doit :
 
