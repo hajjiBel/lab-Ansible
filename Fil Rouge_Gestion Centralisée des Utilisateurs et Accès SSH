@@ -1,7 +1,8 @@
-Gestion Centralisée des Utilisateurs et Accès SSH
- Lab 4
+# Gestion Centralisée des Utilisateurs et Accès SSH
 
-## Application 5 : Gestion des utilisateurs et accès SSH
+## Lab 4
+
+### Application 5 : Gestion des utilisateurs et accès SSH
 
 Créez un playbook `users.yml` qui met en place des comptes utilisateurs sur
 le groupe d'hôtes webservers. Le playbook doit :
@@ -14,9 +15,12 @@ le groupe d'hôtes webservers. Le playbook doit :
 
 Vérifiez que vous pouvez vous connecter en SSH avec l'utilisateur `deploy`
 sur app1 et app2 en utilisant la clé privée correspondante.
- Lab 5
 
-## Application 5 (suite) : Utilisateurs avec variables
+---
+
+## Lab 5
+
+### Application 5 (suite) : Utilisateurs avec variables
 
 Reprenez le playbook `users.yml` et externalisez en variables :
 
@@ -27,9 +31,12 @@ Reprenez le playbook `users.yml` et externalisez en variables :
 Surchargez le nom d'utilisateur pour app2 uniquement (host_vars), par
 exemple `deploy-app2` au lieu de `deploy`, et vérifiez que le compte créé
 diffère bien entre app1 et app2.
-À ajouter en fin de Lab 6
-markdown
-## Application 5 (suite) : Plusieurs utilisateurs, conditions et handler
+
+---
+
+## Lab 6
+
+### Application 5 (suite) : Plusieurs utilisateurs, conditions et handler
 
 Améliorez le playbook `users.yml` pour gérer plusieurs utilisateurs à la
 fois, définis dans une liste de hashs (nom + rôle : "admin" ou "dev") :
@@ -45,9 +52,11 @@ fois, définis dans une liste de hashs (nom + rôle : "admin" ou "dev") :
 
 Exécutez le playbook deux fois de suite et vérifiez l'idempotence.
 
- Lab 7
+---
 
-## Application 5 (suite) : Accès SSH avec templates Jinja2
+## Lab 7
+
+### Application 5 (suite) : Accès SSH avec templates Jinja2
 
 Remplacez la gestion manuelle de la configuration SSH par un template
 `sshd_custom.conf.j2` déployé dans `/etc/ssh/sshd_config.d/` :
@@ -61,9 +70,11 @@ Remplacez la gestion manuelle de la configuration SSH par un template
 Connectez-vous en SSH et vérifiez que le message d'accueil (MOTD) reflète
 bien les informations attendues pour l'hôte concerné.
 
-Lab 8
+---
 
-## Application 5 (suite) : Gestion des utilisateurs en rôle Ansible
+## Lab 8
+
+### Application 5 (suite) : Gestion des utilisateurs en rôle Ansible
 
 Transformez l'ensemble du playbook `users.yml` (Labs 4 à 7) en un rôle
 Ansible nommé `user-management`, avec la liste des utilisateurs et leurs
