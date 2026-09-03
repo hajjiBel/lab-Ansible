@@ -522,19 +522,9 @@ Dans `group_vars/prod` (sans extension), placez les informations de connexion à
 
 ```yaml
 # group_vars/prod
-ansible_user: devops                    # utilisateur SSH sur le client
-ansible_password: "MotDePasseSSH"       # mot de passe SSH
-ansible_connection: ssh
-
 ansible_become: true
 ansible_become_method: sudo
-ansible_become_password: "MotDePasseSudo"
 ```
-
-**Remarques :**
-- Remplacez `devops` par votre nom d'utilisateur réel
-- Remplacez `MotDePasseSSH` et `MotDePasseSudo` par vos mots de passe réels
-- Pour plus de sécurité en production, utilisez `ansible-vault` pour chiffrer ce fichier
 
 ---
 
@@ -545,7 +535,7 @@ Créez le fichier `deploy.yml` à la racine du dossier `webapp` :
 ```yaml
 ---
 - name: Déployer Apache via Docker sur le client
-  hosts: prod
+  hosts: webservers
   become: true
 
   vars:
@@ -588,39 +578,7 @@ Créez le fichier `deploy.yml` à la racine du dossier `webapp` :
           - "{{ httpd_host_port }}:{{ httpd_container_port }}"
 ```
 
----
 
-### 5. Installation d'ansible-lint
-
-Sur le nœud de contrôle Ansible :
-
-```bash
-pip3 install ansible-lint
-```
-
----
-
-### 6. Vérification de la syntaxe
-
-Vérifiez la syntaxe du playbook avec `ansible-lint` :
-
-```bash
-ansible-lint deploy.yml
-```
-
-Si des avertissements ou erreurs apparaissent, corrigez-les avant de continuer.
-
----
-
-### 7. Installation de la collection Docker
-
-Le module `community.docker.docker_container` nécessite la collection Docker :
-
-```bash
-ansible-galaxy collection install community.docker
-```
-
----
 
 ### 8. Exécution du playbook
 
@@ -664,6 +622,22 @@ Vous devriez voir la page par défaut d'Apache : **"It works!"**
 4. **Clarté** : Les variables documentent l'intention du code
 
 ---
+
+## Application (suite) : Rotation de logs avec variables
+
+Reprenez le playbook `log-rotation.yml` et externalisez en variables :
+
+- Le nom de l'application concernée
+- Le nombre de jours de rétention
+- L'activation ou non de la compression
+- L'environnement (dev/prod)
+
+Surchargez la rétention pour app2 uniquement (30 jours au lieu de 7) via
+host_vars, et vérifiez que la configuration générée diffère entre app1 et
+app2.
+
+
+
 
 ## Résumé
 
