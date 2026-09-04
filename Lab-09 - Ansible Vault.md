@@ -158,5 +158,44 @@ l'exécution comme indiqué.
 $ ansible-playbook deploy.yml --vault-password-file vault_pass.txt
 ```
 
+## Application : Sécuriser les identifiants MariaDB avec Ansible Vault
+
+Au Lab 6, vous avez écrit un playbook `mariadb.yml` qui installe MariaDB sur
+les hôtes disposant d'assez de RAM. Cette application vous fait reprendre ce
+playbook pour y intégrer proprement des identifiants sensibles, chiffrés avec
+Ansible Vault.
+
+**Consignes :**
+
+1. Créez un fichier de variables `db_secrets.yml` contenant un mot de passe
+   root MariaDB :
+   ```yaml
+   ---
+   mysql_root_password: "S3cr3tP@ss!"
+   ```
+2. Chiffrez entièrement ce fichier avec Ansible Vault :
+   ```bash
+   ansible-vault encrypt db_secrets.yml
+   ```
+3. Modifiez le playbook `mariadb.yml` du Lab 6 pour :
+   - Charger ce fichier de variables avec `vars_files`
+   - Ajouter une tâche utilisant le module `mysql_user` (ou `command`/`mysql`
+     selon ce qui est disponible) pour définir le mot de passe root avec la
+     variable `mysql_root_password`
+4. Plutôt que de saisir le mot de passe Vault à chaque exécution, créez un
+   fichier `vault_pass.txt` contenant le mot de passe du coffre, protégez-le
+   avec des permissions strictes, et **assurez-vous qu'il n'est jamais commité
+   dans Git** (ajoutez-le à `.gitignore`) :
+   ```bash
+   chmod 600 vault_pass.txt
+   echo "vault_pass.txt" >> .gitignore
+   ```
+5. Exécutez le playbook en utilisant ce fichier de mot de passe :
+   ```bash
+   ansible-playbook mariadb.yml --vault-password-file vault_pass.txt
+   ```
+
+
+
 ---
 [Next Lab ->](./Lab%209%20-%20Ansible%20Tower.md)
